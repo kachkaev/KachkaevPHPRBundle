@@ -4,37 +4,61 @@ use Kachkaev\RBundle\Exception\RProcessException;
 
 abstract class AbstractRProcess implements RProcessInterface
 {
+    protected $inputLineCount = 0;
     protected $inputLog = [];
     protected $outputLog = [];
-    protected $unreadOutputCount = [];
     protected $errors = [];
-    protected $lastWriteErrorCount = [];
-    protected $running = false;
+    protected $lastWriteCommandCount = 0;
+    protected $lastWriteErrorCount = 0;
+    protected $active = false;
 
     protected abstract function doStart();
     protected abstract function doStop();
-    protected abstract function doWrite();
+    protected abstract function doWrite(array $rInputLines);
 
     public function start()
     {
-        $this->mustNotBeRunning();
+        $this->mustBeStopped();
+        $this->inputLineCount = 0;
+        $this->inputLog = [];
+        $this->outputLog = [];
+        $this->errors = [];
+        $this->lastWriteCommandCount = 0;
+        $this->lastWriteErrorCount = 0;
+
         $this->doStart();
-        $this->running = true;
-    }
-    
-    public function read($asArray = false)
-    {
-        $lastOutputBuffer = $this->outputBuffer;
-        $outputLog = array_merge($lastUnreadOutput, $lastOutputBuffer);
-        $this->outputBuffer = [];
-        return implode("\n", $lastOutputBuffer);
+        $this->active = true;
     }
 
-    public function write($s)
+    public function stop()
     {
-        $this->mustBeRunning();
+        $this->mustBeStarted();
+        $this->doStop();
+        $this->active = false;
+    }
+
+    public function isStarted()
+    {
+        return !$this->active;
+    }
+
+    public function isStopped()
+    {
+        return !$this->active;
+    }
+
+    public function write($rInput)
+    {
+        if (!is_string($rInput)) {
+            throw new \InvalidArgumentException(
+                    sprintf("R input must be a string, %s given",
+                            var_export($rInput, true)));
+        }
+
+        $this->mustBeStarted();
         try {
-            $writtenCommands = $this->doWrite($s); 
+            $rInputLines = explode("\n", $rInput);
+            $this->doWrite($rInputLines);
         } catch (Exception $e) {
             try {
                 $this->stop();
@@ -42,42 +66,79 @@ abstract class AbstractRProcess implements RProcessInterface
             }
             throw $e;
         }
-        return $writtenCommands;
-    }
-
-    public function getAllOutput($asArray = false)
-    {
-        return $asArray ? $this->outputLog : implode("\n", $this->outputLog); 
+        return $this->getLastWriteErrorCount();
     }
 
     public function getAllInput($asArray = false)
     {
-        return $asArray ? $this->inputLog : implode("\n", $this->inputLog); 
+        return $asArray ? $this->inputLog : implode("\n", $this->inputLog);
     }
 
-    public function stop()
+    public function getAllOutput($asArray = false)
     {
-        $this->mustBeRunning();
-        $this->doStop();
-        $this->started = false;
+        return $asArray ? $this->outputLog : implode("\n", $this->outputLog);
     }
 
-    public function isStopped()
+    public function getLastWriteInput($asArray = false)
     {
-        return !$this->running;
+        $lastWriteInput = array_slice($this->inputLog,
+                -$this->lastWriteCommandCount, $this->lastWriteCommandCount);
+        return $asArray ? $lastWriteInput : implode("\n", $lastWriteInput);
     }
-    
+
+    public function getLastWriteOutput($asArray = false)
+    {
+        $lastWriteOutput = array_slice($this->outputLog,
+                -$this->lastWriteCommandCount, $this->lastWriteCommandCount);
+        return $asArray ? $lastWriteOutput : implode("\n", $lastWriteOutput);
+    }
+
+    public function hasErrors()
+    {
+        return count($this->errors) != 0;
+    }
+
+    public function getErrorCount()
+    {
+        return count($this->errors);
+    }
+
+    public function getErrors()
+    {
+        return $this->errors;
+    }
+
+    public function hasLastWriteErrors()
+    {
+        return $this->lastWriteErrorCount != 0;
+    }
+
+    public function getLastWriteErrorCount()
+    {
+        return $this->lastWriteErrorCount;
+    }
+
+    public function getLastWriteErrors()
+    {
+        $lastWriteErrors = array_slice($this->errors,
+                -$this->lastWriteErrorCount, $this->lastWriteErrorCount);
+        return $lastWriteErrors;
+
+    }
+
     private function mustBeStarted()
     {
-        if (!$this->running) {
-            throw new RProcessException('R process is stopped, it must be started');
+        if (!$this->active) {
+            throw new RProcessException(
+                    'R process is stopped, it must be started');
         }
     }
-    
+
     private function mustBeStopped()
     {
-        if ($this->running) {
-            throw new RProcessException('R process is running, it must be stopped');
+        if ($this->active) {
+            throw new RProcessException(
+                    'R process has been started, it must be stopped');
         }
     }
 }

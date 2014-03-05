@@ -1,8 +1,9 @@
 <?php
 namespace Kachkaev\RBundle\Process;
-use Symfony\Component\Process\ProcessBuilder;
+use Kachkaev\RBundle\Exception\RProcessException;
 
 use Symfony\Component\Process\Process;
+use Symfony\Component\Process\ProcessBuilder;
 
 class CommandLineRProcess extends AbstractRProcess
 {
@@ -18,14 +19,20 @@ class CommandLineRProcess extends AbstractRProcess
     {
         $pb = new ProcessBuilder();
         $pb->add($this->rCommand);
-        
-        $this->process = $pb->getProcess();
-        $this->process->start();
-    }
+        $pb->add('--no-save');
+        $pb->setTimeout(null);
 
-    function doWrite()
-    {
-        //$this->process->is
+        $this->process = $pb->getProcess();
+        $this->process->run();
+        
+        var_dump($this->process->getIncrementalOutput());
+        var_dump($this->process->getIncrementalOutput());
+        var_dump('=============');
+        
+        $errorOutput = $this->process->getIncrementalErrorOutput();
+        if ($errorOutput) {
+            throw new RProcessException($errorOutput);
+        }
     }
 
     function doStop()
@@ -33,8 +40,24 @@ class CommandLineRProcess extends AbstractRProcess
         $this->process->stop();
     }
 
-    public function doIsPrompting()
+    function doWrite(array $rInputLines)
     {
-        return $this->process->isTerminated();
+        $initialCommandCount = count($this->outputLog);
+        $initialLineCount = $this->inputLineCount;
+
+        $currentCommandCount = 0;
+        $currentLineCount = 0;
+        
+        foreach ($rInputLines as $rInputLine) {
+            ++$currentLineCount;
+            var_dump($rInputLine);
+            $this->process->setStdin($rInputLine + "\n");
+            $this->process->start();
+            $this->process->wait();
+            
+            var_dump($this->process->getIncrementalOutput());
+            var_dump($this->process->getIncrementalOutput());
+        }
     }
+
 }

@@ -18,13 +18,8 @@ abstract class AbstractREngine implements REngineInterface
         $rProcess = $this->createProcess();
         $rProcess->start();
         $rProcess->write($rCode);
-
-        while(!$rProcess->isPrompting()) {
-            usleep(100000);
-        }
-
         $rProcess->stop();
-        $output = $rProcess->getAllOutputAsString();
+        $output = $rProcess->getAllOutput();
         unset($rProcess);
 
         return $output;
