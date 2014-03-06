@@ -24,19 +24,22 @@ abstract class AbstractREngine implements REngineInterface
         $rProcess->write($rCode);
         $rProcess->stop();
 
-        $exception = null;
-        if ($rProcess->hasErrors()) {
-            $exception = new RErrorsException($rProcess->getAllInput(true), $rProcess->getAllOutput(true), $rProcess->getErrors());
-        } else {
-            $output = $rProcess->getAllOutput();
-        }
+        $result = $rProcess->getAllResult();
+//         $exception = null;
+//         if ($rProcess->hasErrors()) {
+//             $exception = new RErrorsException($rProcess->getAllInput(true), $rProcess->getAllOutput(true), $rProcess->getErrors());
+//         } else {
+//             $output = $rProcess->getAllOutput();
+//         }
         unset($rProcess);
 
-        if ($exception) {
-            throw $exception;
-        } else {
-            return $output;
-        }
+//         if ($exception) {
+//             throw $exception;
+//         } else {
+//             return $output;
+//         }
+
+        return $result;
     }
 
     public function createInteractiveProcess()

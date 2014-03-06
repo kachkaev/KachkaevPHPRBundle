@@ -48,7 +48,7 @@ interface RProcessInterface
     /**
      * Returns all input to the R interpreter
      * 
-     * @param string $asArray if set to true, an array of strings is returned instead of a single string
+     * @param boolean $asArray if set to true, an array of strings is returned instead of a single string
      *                 (the input is split by commands)
      * @return string|array all input to R
      */
@@ -57,16 +57,42 @@ interface RProcessInterface
     /**
      * Returns all output from the R interpreter
      * 
-     * @param string $asArray if set to true, an array of strings is returned instead of a single string
+     * @param boolean $asArray if set to true, an array of strings is returned instead of a single string
      *                 (the output is split by input commands)
      * @return string|array all output from R
      */
     public function getAllOutput($asArray = false);
 
     /**
+     * Returns all input, output and errors (as text or array, depending on $asArray parameter)
+     * 
+     * As text:
+     * --------
+     * > input
+     * output
+     * > multi-line input line 1
+     * + line 2
+     * output
+     * >
+     * >
+     * > a+b
+     * Error:object 'a' not found
+     *
+     * 
+     * As array:
+     * ---------
+     * ['input1', 'output1', 'Error1']
+     * ['input2', 'output2', 'Error2']
+     * 
+     * @param boolean $asArray if set to true, the result is returned as an array
+     * @return string|array result of R execution
+     */
+    public function getAllResult($asArray = false);
+
+    /**
      * Returns the most recent input to the R interpreter (since the last call of write() method)
      * 
-     * @param string $asArray if set to true, an array of strings is returned instead of a single string
+     * @param boolean $asArray if set to true, an array of strings is returned instead of a single string
      *                 (the input is split by commands)
      * @return string|array all input to R
      */
@@ -75,12 +101,22 @@ interface RProcessInterface
     /**
      * Returns the most recent output from the R interpreter (since the last call of write() method) 
      * 
-     * @param string $asArray if set to true, an array of strings is returned instead of a single string
+     * @param boolean $asArray if set to true, an array of strings is returned instead of a single string
      *                 (the output is split by input commands)
      * @return string|array all output from R
      */
     public function getLastWriteOutput($asArray = false);
 
+    /**
+     * Returns the most recent input, output and errors (since the last call of write() method)
+     * 
+     * For details on format see getAllResult()
+     *
+     * @param boolean $asArray if set to true, the result is returned as an array
+     * @return string|array result of R execution
+     */
+    public function getLastWriteResult($asArray = false);
+    
     /**
      * Determines if there were errors since the last call of start() method
      * 

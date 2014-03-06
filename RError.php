@@ -2,22 +2,22 @@
 namespace Kachkaev\RBundle;
 class RError
 {
-    private $lineNumber;
+    private $inputLineNumber;
     private $commandNumber;
     private $command;
     private $errorMessage;
 
-    public function __construct($lineNumber, $commandNumber, $command, $errorMessage)
+    public function __construct($inputLineNumber, $commandNumber, $command, $errorMessage)
     {
-        $this->lineNumber = $lineNumber;
+        $this->inputLineNumber = $inputLineNumber;
         $this->commandNumber = $commandNumber;
         $this->command = $command;
         $this->errorMessage = $errorMessage;
     }
 
-    public function getLineNumber()
+    public function getInputLineNumber()
     {
-        return $this->lineNumber;
+        return $this->inputLineNumber;
     }
 
     public function getCommandNumber()

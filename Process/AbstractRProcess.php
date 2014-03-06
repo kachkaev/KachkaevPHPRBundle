@@ -12,6 +12,11 @@ abstract class AbstractRProcess implements RProcessInterface
     protected $lastWriteErrorCount = 0;
     protected $active = false;
 
+    protected $cachedAllResultAsString;
+    protected $cachedLastWriteResultAsString;
+    protected $cachedAllResultAsArray;
+    protected $cachedLastWriteResultAsArray;
+
     protected abstract function doStart();
     protected abstract function doStop();
     protected abstract function doWrite(array $rInputLines);
@@ -56,10 +61,15 @@ abstract class AbstractRProcess implements RProcessInterface
         }
 
         $this->mustBeStarted();
-        
+
         $this->lastWriteCommandCount = 0;
         $this->lastWriteErrorCount = 0;
-        
+
+        $cachedAllResultAsString = null;
+        $cachedLastWriteResultAsString = null;
+        $cachedAllResultAsArray = null;
+        $cachedLastWriteResultAsArray = null;
+
         try {
             $rInputLines = explode("\n", $rInput);
             $this->doWrite($rInputLines);
@@ -83,6 +93,30 @@ abstract class AbstractRProcess implements RProcessInterface
         return $asArray ? $this->outputLog : implode("\n", $this->outputLog);
     }
 
+    public function getAllResult($asArray = false)
+    {
+        $commandCount = count($this->inputLog);
+
+        if ($commandCount == 0) {
+            return $asArray ? [] : '';
+        }
+        ;
+
+        if ($asArray) {
+            if (!$this->cachedAllResultAsArray) {
+                $this->cachedAllResultAsArray = $this
+                        ->getResult(true, 1, $commandCount);
+            }
+            return $this->cachedAllResultAsArray;
+        } else {
+            if (!$this->cachedAllResultAsString) {
+                $this->cachedAllResultAsString = $this
+                        ->getResult(false, 1, $commandCount);
+            }
+            return $this->cachedAllResultAsString;
+        }
+    }
+
     public function getLastWriteInput($asArray = false)
     {
         $lastWriteInput = array_slice($this->inputLog,
@@ -95,6 +129,32 @@ abstract class AbstractRProcess implements RProcessInterface
         $lastWriteOutput = array_slice($this->outputLog,
                 -$this->lastWriteCommandCount, $this->lastWriteCommandCount);
         return $asArray ? $lastWriteOutput : implode("\n", $lastWriteOutput);
+    }
+
+    public function getLastWriteResult($asArray = false)
+    {
+        if ($this->lastWriteCommandCount) {
+            return $asArray ? [] : '';
+        }
+
+        $commandCount = count($this->inputLog);
+        if ($asArray) {
+            if (!$this->cachedAllResultAsArray) {
+                $this->cachedLastWriteResultAsArray = $this
+                        ->getResult(true,
+                                $commandCount - $this->lastWriteCommandCount
+                                        + 1, $commandCount);
+            }
+            return $this->cachedLastWriteResultAsArray;
+        } else {
+            if (!$this->cachedLastWriteResultAsString) {
+                $this->cachedLastWriteResultAsString = $this
+                        ->getResult(false,
+                                $commandCount - $this->lastWriteCommandCount
+                                        + 1, $commandCount);
+            }
+            return $this->cachedLastWriteResultAsString;
+        }
     }
 
     public function hasErrors()
@@ -144,5 +204,59 @@ abstract class AbstractRProcess implements RProcessInterface
             throw new RProcessException(
                     'R process has been started, it must be stopped');
         }
+    }
+
+    /**
+     * @see AbstractRProcess::getAllResult()
+     */
+    private function getResult($asArray, $commandNumberFrom, $commandNumberTo)
+    {
+        if (!is_int($commandNumberFrom) || !is_int($commandNumberTo)
+                || $commandNumberFrom < 1
+                || $commandNumberTo > count($this->inputLog)
+                || $commandNumberFrom > $commandNumberTo) {
+            throw new \InvalidArgumentException(
+                    sprintf('Wrong command range: %s, %s',
+                            var_export($commandNumberFrom, true),
+                            var_export($commandNumberTo, true)));
+        }
+
+        $errorsByCommandNumbers = [];
+
+        foreach ($this->errors as $error) {
+            $n = $error->getCommandNumber();
+            if ($n >= $commandNumberFrom && $n <= $commandNumberTo) {
+                $errorsByCommandNumbers[$n] = $error;
+            }
+        }
+
+        $resultAsArray = [];
+        for ($n = $commandNumberFrom; $n <= $commandNumberTo; ++$n) {
+            $errorMessage = null;
+            if (array_key_exists($n, $errorsByCommandNumbers)) {
+                $errorMessage = $errorsByCommandNumbers[$n]->getErrorMessage();
+            }
+            $resultAsArray[] = [$this->inputLog[$n - 1],
+                    $this->outputLog[$n - 1], $errorMessage];
+        }
+
+        if ($asArray) {
+            return $resultAsArray;
+        }
+
+        $resultbyCommands = [];
+
+        foreach ($resultAsArray as $resultCommand) {
+            $in = '> ' . str_replace("\n", "\n+ ", $resultCommand[0]);
+            $out = $resultCommand[2] ? : $resultCommand[1];
+
+            if (strlen($out)) {
+                $resultByCommands[] = $in . "\n" . $out;
+            } else {
+                $resultByCommands[] = $in;
+            }
+        }
+
+        return implode("\n", $resultByCommands);
     }
 }
