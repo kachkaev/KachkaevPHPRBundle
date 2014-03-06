@@ -34,11 +34,8 @@ class CommandLineRProcess extends AbstractRProcess
         if (!is_resource($this->process)) {
             throw new RProcessException('Could not create the process');
         }
-        //stream_set_timeout($this->pipes[1], 2);
-        //stream_set_blocking($this->pipes[1], false);
         
         stream_set_blocking($this->pipes[2], false);
-        //stream_set_timeout($this->pipes[2], 2);
         
         $errorOutput = fgets($this->pipes[2]);
         if ($errorOutput) {
