@@ -1,5 +1,9 @@
 <?php
 namespace Kachkaev\RBundle\Engine;
+use Kachkaev\RBundle\Exception\RErrorsException;
+
+use Kachkaev\RBundle\Exception\RProcessException;
+
 use Kachkaev\RBundle\Process\RProcessInterface;
 
 abstract class AbstractREngine implements REngineInterface
@@ -19,10 +23,20 @@ abstract class AbstractREngine implements REngineInterface
         $rProcess->start();
         $rProcess->write($rCode);
         $rProcess->stop();
-        $output = $rProcess->getAllOutput();
+
+        $exception = null;
+        if ($rProcess->hasErrors()) {
+            $exception = new RErrorsException($rProcess->getAllInput(true), $rProcess->getAllOutput(true), $rProcess->getErrors());
+        } else {
+            $output = $rProcess->getAllOutput();
+        }
         unset($rProcess);
 
-        return $output;
+        if ($exception) {
+            throw $exception;
+        } else {
+            return $output;
+        }
     }
 
     public function createInteractiveProcess()

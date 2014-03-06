@@ -56,6 +56,10 @@ abstract class AbstractRProcess implements RProcessInterface
         }
 
         $this->mustBeStarted();
+        
+        $this->lastWriteCommandCount = 0;
+        $this->lastWriteErrorCount = 0;
+        
         try {
             $rInputLines = explode("\n", $rInput);
             $this->doWrite($rInputLines);

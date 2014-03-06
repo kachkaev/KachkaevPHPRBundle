@@ -1,5 +1,5 @@
 parameters:
-    kachkaev_r.engine.command_line.command: /usr/bin/r
+    kachkaev_r.engine.command_line.command: /usr/bin/R
     kachkaev_r.engine.server_based.url: 127.0.0.1:8787
 
 services:

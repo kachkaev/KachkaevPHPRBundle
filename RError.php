@@ -1,6 +1,6 @@
 <?php
-namespace Kachkaev\RBundle\Exception;
-class RError extends RException
+namespace Kachkaev\RBundle;
+class RError
 {
     private $lineNumber;
     private $commandNumber;
@@ -12,9 +12,7 @@ class RError extends RException
         $this->lineNumber = $lineNumber;
         $this->commandNumber = $commandNumber;
         $this->command = $command;
-        $this->errorMessage = $message;
-
-        parent::__construct($message, 0, null);
+        $this->errorMessage = $errorMessage;
     }
 
     public function getLineNumber()
