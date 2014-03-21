@@ -14,3 +14,6 @@ services:
     kachkaev_r.core:
         class: Kachkaev\RBundle\RCore
         arguments: [@kachkaev_r.engine.command_line]
+
+    kachkaev_r.output_interpreter:
+        class: Kachkaev\RBundle\ROutputInterpreter
