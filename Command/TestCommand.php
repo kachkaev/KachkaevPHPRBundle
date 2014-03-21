@@ -27,11 +27,14 @@ class TestCommand extends ContainerAwareCommand
         switch ($input->getArgument('example')) {
             case '0': 
                 $example = <<<EOF
+library(asd)
 1+1 + (
 1)
-  
+a=1+1;
+Sys.sleep(0)
 sss                        
                         
+
 1+1
 EOF;
             break;
