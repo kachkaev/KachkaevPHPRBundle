@@ -15,11 +15,17 @@ class RError
         $this->errorMessage = $errorMessage;
     }
 
+    /**
+     * zero-based
+     */
     public function getInputLineNumber()
     {
         return $this->inputLineNumber;
     }
 
+    /**
+     * zero-based
+     */
     public function getCommandNumber()
     {
         return $this->commandNumber;

@@ -3,8 +3,6 @@ parameters:
     kachkaev_r.engine.server_based.url: 127.0.0.1:8787
 
 services:
-
-    # face detectors
     kachkaev_r.engine.command_line:
         class: Kachkaev\RBundle\Engine\CommandLineREngine
         arguments: [%kachkaev_r.engine.command_line.command%]
@@ -13,6 +11,6 @@ services:
         class: Kachkaev\RBundle\Engine\ServerBasedREngine
         arguments: [%kachkaev_r.engine.server_based.url%]
         
-    kachkaev_r.r:
-        class: Kachkaev\RBundle\R
+    kachkaev_r.core:
+        class: Kachkaev\RBundle\RCore
         arguments: [@kachkaev_r.engine.command_line]

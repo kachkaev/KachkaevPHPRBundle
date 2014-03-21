@@ -17,33 +17,39 @@ abstract class AbstractREngine implements REngineInterface
      * (non-PHPdoc)
      * @see \Kachkaev\RBundle\Engine\REngineInterface::run()
      */
-    public function run($rCode)
+    public function run($rCode, $resultAsArray = false, $isErrorSensitive = false)
     {
-        $rProcess = $this->createProcess();
+        $rProcess = $this->createInteractiveProcess($isErrorSensitive);
         $rProcess->start();
-        $rProcess->write($rCode);
+        try {
+            $rProcess->write($rCode);
+            $errorsException = null;
+        } catch (RErrorsException $e) {
+            $errorsException = $e; 
+        }
         $rProcess->stop();
 
-        $result = $rProcess->getAllResult();
-//         $exception = null;
-//         if ($rProcess->hasErrors()) {
-//             $exception = new RErrorsException($rProcess->getAllInput(true), $rProcess->getAllOutput(true), $rProcess->getErrors());
-//         } else {
-//             $output = $rProcess->getAllOutput();
-//         }
+        $result = $rProcess->getAllResult($resultAsArray);
         unset($rProcess);
-
-//         if ($exception) {
-//             throw $exception;
-//         } else {
-//             return $output;
-//         }
+        
+        if ($errorsException) {
+            throw $errorsException;
+        }
 
         return $result;
     }
 
-    public function createInteractiveProcess()
+    /**
+     * (non-PHPdoc)
+     * @see \Kachkaev\RBundle\Engine\REngineInterface::createInteractiveProcess()
+     */
+    public function createInteractiveProcess($isErrorSensitive = false)
     {
-        return $this->createProcess();
+        $rProcess = $this->createProcess();
+        if ($isErrorSensitive) {
+            $rProcess->setErrorSensitive($isErrorSensitive);
+        }
+        
+        return $rProcess;
     }
 }

@@ -1,5 +1,7 @@
 <?php
 namespace Kachkaev\RBundle\Process;
+use Kachkaev\RBundle\Exception\RErrorsException;
+
 use Kachkaev\RBundle\Exception\RProcessException;
 
 abstract class AbstractRProcess implements RProcessInterface
@@ -10,7 +12,8 @@ abstract class AbstractRProcess implements RProcessInterface
     protected $errors = [];
     protected $lastWriteCommandCount = 0;
     protected $lastWriteErrorCount = 0;
-    protected $active = false;
+    protected $isRunning = false;
+    protected $errorSensitive = false;
 
     protected $cachedAllResultAsString;
     protected $cachedLastWriteResultAsString;
@@ -23,7 +26,7 @@ abstract class AbstractRProcess implements RProcessInterface
 
     public function start()
     {
-        $this->mustBeStopped();
+        $this->mustNotBeRunning();
         $this->inputLineCount = 0;
         $this->inputLog = [];
         $this->outputLog = [];
@@ -32,24 +35,25 @@ abstract class AbstractRProcess implements RProcessInterface
         $this->lastWriteErrorCount = 0;
 
         $this->doStart();
-        $this->active = true;
+        $this->isRunning = true;
     }
 
     public function stop()
     {
-        $this->mustBeStarted();
+        $this->mustBeRunning();
         $this->doStop();
-        $this->active = false;
+        $this->isRunning = false;
     }
 
-    public function isStarted()
+    public function restart()
     {
-        return !$this->active;
+        $this->stop();
+        $this->start();
     }
 
-    public function isStopped()
+    public function isRunning()
     {
-        return !$this->active;
+        return !$this->isRunning;
     }
 
     public function write($rInput)
@@ -60,7 +64,7 @@ abstract class AbstractRProcess implements RProcessInterface
                             var_export($rInput, true)));
         }
 
-        $this->mustBeStarted();
+        $this->mustBeRunning();
 
         $this->lastWriteCommandCount = 0;
         $this->lastWriteErrorCount = 0;
@@ -80,7 +84,13 @@ abstract class AbstractRProcess implements RProcessInterface
             }
             throw $e;
         }
-        return $this->getLastWriteErrorCount();
+        
+        $errorCount = $this->getLastWriteErrorCount();
+        if ($this->errorSensitive && $errorCount) {
+            throw new RErrorsException($this->getLastWriteInput(true), $this->getLastWriteOutput(true), $this->getLastWriteErrors());
+        };
+        
+        return $errorCount;
     }
 
     public function getAllInput($asArray = false)
@@ -105,13 +115,13 @@ abstract class AbstractRProcess implements RProcessInterface
         if ($asArray) {
             if (!$this->cachedAllResultAsArray) {
                 $this->cachedAllResultAsArray = $this
-                        ->getResult(true, 1, $commandCount);
+                        ->getResult(true, 0, $commandCount - 1);
             }
             return $this->cachedAllResultAsArray;
         } else {
             if (!$this->cachedAllResultAsString) {
                 $this->cachedAllResultAsString = $this
-                        ->getResult(false, 1, $commandCount);
+                        ->getResult(false, 0, $commandCount - 1);
             }
             return $this->cachedAllResultAsString;
         }
@@ -142,16 +152,16 @@ abstract class AbstractRProcess implements RProcessInterface
             if (!$this->cachedAllResultAsArray) {
                 $this->cachedLastWriteResultAsArray = $this
                         ->getResult(true,
-                                $commandCount - $this->lastWriteCommandCount
-                                        + 1, $commandCount);
+                                $commandCount - $this->lastWriteCommandCount,
+                                $commandCount - 1);
             }
             return $this->cachedLastWriteResultAsArray;
         } else {
             if (!$this->cachedLastWriteResultAsString) {
                 $this->cachedLastWriteResultAsString = $this
                         ->getResult(false,
-                                $commandCount - $this->lastWriteCommandCount
-                                        + 1, $commandCount);
+                                $commandCount - $this->lastWriteCommandCount,
+                                $commandCount - 1);
             }
             return $this->cachedLastWriteResultAsString;
         }
@@ -190,17 +200,33 @@ abstract class AbstractRProcess implements RProcessInterface
 
     }
 
-    private function mustBeStarted()
+    public function isErrorSensitive()
     {
-        if (!$this->active) {
+        return $this->errorSensitive;
+    }
+
+    public function setErrorSensitive($trueOrFalse)
+    {
+        if (!is_bool($trueOrFalse)) {
+            throw new \InvalidArgumentException(
+                    sprintf(
+                            'New value of error sensitivity must be boolean, %s given',
+                            var_export($trueOrFalse, true)));
+        }
+        $this->errorSensitive = $trueOrFalse;
+    }
+
+    private function mustBeRunning()
+    {
+        if (!$this->isRunning) {
             throw new RProcessException(
                     'R process is stopped, it must be started');
         }
     }
 
-    private function mustBeStopped()
+    private function mustNotBeRunning()
     {
-        if ($this->active) {
+        if ($this->isRunning) {
             throw new RProcessException(
                     'R process has been started, it must be stopped');
         }
@@ -212,8 +238,8 @@ abstract class AbstractRProcess implements RProcessInterface
     private function getResult($asArray, $commandNumberFrom, $commandNumberTo)
     {
         if (!is_int($commandNumberFrom) || !is_int($commandNumberTo)
-                || $commandNumberFrom < 1
-                || $commandNumberTo > count($this->inputLog)
+                || $commandNumberFrom < 0
+                || $commandNumberTo >= count($this->inputLog)
                 || $commandNumberFrom > $commandNumberTo) {
             throw new \InvalidArgumentException(
                     sprintf('Wrong command range: %s, %s',
@@ -236,8 +262,8 @@ abstract class AbstractRProcess implements RProcessInterface
             if (array_key_exists($n, $errorsByCommandNumbers)) {
                 $errorMessage = $errorsByCommandNumbers[$n]->getErrorMessage();
             }
-            $resultAsArray[] = [$this->inputLog[$n - 1],
-                    $this->outputLog[$n - 1], $errorMessage];
+            $resultAsArray[] = [$this->inputLog[$n], $this->outputLog[$n],
+                    $errorMessage];
         }
 
         if ($asArray) {

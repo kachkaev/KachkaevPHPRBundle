@@ -3,39 +3,54 @@ namespace Kachkaev\RBundle\Process;
 use Kachkaev\RBundle\Exception\RProcessException;
 use Kachkaev\RBundle\Exception\RErrorException;
 
+/**
+ * RProcessInterface is used in wrappers for a synchronous R interpreter process
+ * 
+ * Input commands are sent using write().
+ * 
+ * It is possible to obtain back the input, the output, the list of errors
+ * and the overall result (input + output + errors).
+ * 
+ * Obtaining can be done for all data (since the launch of the process)
+ * or only for the last write().
+ * 
+ * 
+ * @author  "Alexander Kachkaev <alexander@kachkaev.ru>"
+ *
+ */
 interface RProcessInterface
 {
     /**
      * Starts the R process and also resets errors, input and output
      * 
-     * @throws RProcessException if the process has already been started
+     * @throws RProcessException if the process is running
      */
     public function start();
 
     /**
      * Stops the R process
      * 
-     * @throws RProcessException if the process has already been stopped or is not yet started
+     * @throws RProcessException if the process is not running
      */
     public function stop();
 
     /**
-     * Checks if the R process has been started
+     * Restarts the R process (stops and starts it).
+     * 
+     * @throws RProcessException if the process is not running
+     */
+    public function restart();
+    
+    /**
+     * Checks if the R process is running
      * @return boolean true if the process has been started, but not stopped; false otherwise
      */
-    public function isStarted();
-
-    /**
-     * Checks if the R process has been stopped or not yet started
-     * 
-     * @return boolean true if the process has been stopped or not yet started; false otherwise
-     */
-    public function isStopped();
+    public function isRunning();
 
     /**
      * Writes lines of commands to R interpreter
      * 
-     * @param string $rInput a multi-line string with commands to execute 
+     * @param string $rInput a multi-line string with commands to execute (no trailing EOL symbol is needed)
      * @return integer the number of errors during the execution (same as getLastWriteErrorCount())
      *
      * @throws RProcessException if the given input does not form a complete 
@@ -68,21 +83,25 @@ interface RProcessInterface
      * 
      * As text:
      * --------
-     * > input
-     * output
-     * > multi-line input line 1
-     * + line 2
-     * output
+     * > 2*2
+     * [1] 4
+     * > 2*(
+     * + 1+1)
+     * [1] 4
+     * >            <- empty lines are not followed by lines with output (no ">")
      * >
      * >
-     * > a+b
+     * > a*2
      * Error:object 'a' not found
      *
      * 
      * As array:
      * ---------
-     * ['input1', 'output1', 'Error1']
-     * ['input2', 'output2', 'Error2']
+     * ['input1', 'output1', null]
+     * ['input2', null, 'error2']
+     * 
+     * 0th element: always a string
+     * 1st and 2nd elements: a string or null
      * 
      * @param boolean $asArray if set to true, the result is returned as an array
      * @return string|array result of R execution
@@ -159,4 +178,19 @@ interface RProcessInterface
      * @return array
      */
     public function getLastWriteErrors();
+    
+    /**
+     * Check if R process is currently sensitive to errors
+     * (throws RErrorsException when write() is called)
+     */
+    public function isErrorSensitive();
+    
+    /**
+     * Sets sensitivity to R errors
+     * If enabled, write() throws RErrorsException if they occur
+     * Otherwise, the errors are just logged and are accessible via getLastWriteErrors()
+     * 
+     * @param bool $trueOrFalse
+     */
+    public function setErrorSensitive($trueOrFalse);
 }
