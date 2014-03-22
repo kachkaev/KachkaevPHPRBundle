@@ -1,0 +1,36 @@
+{
+    "name": "kachkaev/php-r-bundle",
+    "type": "symfony-bundle",
+    "description": "Symfony2 bundle for integration with php-r library that provides ability to run R scripts from PHP",
+    "keywords": ["r", "statistical analysis", "stats", "bridge"],
+    "homepage": "https://github.com/kachkaev/PHPR",
+    "license": "MIT",
+    "authors": [{
+        "name": "Alexander Kachkaev",
+        "email": "alexander@kachkaev.ru",
+        "homepage": "http://en.kachkaev.ru/"
+    },
+    {
+        "name": "Contributors",
+        "homepage": "https://github.com/kachkaev/php-/contributors"
+    }],
+    "require": {
+        "php": "~5.3",
+        "fermio/sprites": "0.3.*@dev",
+        "symfony/framework-bundle": "~2.0"
+    },
+    "replace": {
+        "pminnieur/sprites-bundle": "*"
+    },
+    "autoload": {
+        "psr-0": {
+            "Fermio\\Bundle\\SpritesBundle\\": ""
+        }
+    },
+    "target-dir": "Fermio/Bundle/SpritesBundle",
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0.x-dev"
+        }
+    }
+}
