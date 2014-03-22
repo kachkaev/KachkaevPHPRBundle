@@ -16,18 +16,15 @@
     }],
     "require": {
         "php": "~5.3",
-        "fermio/sprites": "0.3.*@dev",
+        "kachkaev/php-r": "1.0.*@dev",
         "symfony/framework-bundle": "~2.0"
-    },
-    "replace": {
-        "pminnieur/sprites-bundle": "*"
     },
     "autoload": {
         "psr-0": {
-            "Fermio\\Bundle\\SpritesBundle\\": ""
+            "Kachkaev\\PHPRBundle\\": ""
         }
     },
-    "target-dir": "Fermio/Bundle/SpritesBundle",
+    "target-dir": "Kachkaev/PHPRBundle",
     "extra": {
         "branch-alias": {
             "dev-master": "1.0.x-dev"
