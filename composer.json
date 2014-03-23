@@ -3,7 +3,7 @@
     "type": "symfony-bundle",
     "description": "Symfony2 bundle for integration with php-r library that provides ability to run R scripts from PHP",
     "keywords": ["r", "statistical analysis", "stats", "bridge"],
-    "homepage": "https://github.com/kachkaev/PHPR",
+    "homepage": "https://github.com/kachkaev/PHPRBundle",
     "license": "MIT",
     "authors": [{
         "name": "Alexander Kachkaev",
