@@ -1,16 +1,16 @@
 parameters:
-    kachkaev_php_r.engine: @kachkaev_php_r.engine.command_line
+#   kachkaev_php_r.engine: 
     kachkaev_php_r.engine.command_line.command: /usr/bin/R
 #   kachkaev_php_r.engine.server_based.url: 127.0.0.1:8787
 
 services:
     kachkaev_php_r.core:
         class: Kachkaev\PHPR\RCore
-        arguments: [kachkaev_php_r.engine]
+        arguments: [@kachkaev_php_r.engine.command_line]
 
     kachkaev_php_r.engine.command_line:
         class: Kachkaev\PHPR\Engine\CommandLineREngine
-        arguments: [%kachkaev_r.engine.command_line.command%]
+        arguments: [%kachkaev_php_r.engine.command_line.command%]
 
 #    kachkaev_php_r.engine.server_based:
 #        class: Kachkaev\PHPR\Engine\ServerBasedREngine
