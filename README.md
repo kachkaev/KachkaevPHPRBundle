@@ -1,7 +1,7 @@
 KachkaevPHPRBundle [![Build Status](https://secure.travis-ci.org/kachkaev/KachkaevPHPRBundle.png)](http://travis-ci.org/kachkaev/KachkaevPHPRBundle)
 ==================
 
-Symfony2 bundle for the [php-r](https://github.com/kachkaev/php-r) library
+Symfony2/Symfony3 bundle for the [php-r](https://github.com/kachkaev/php-r) library
 
 Installation
 ------------

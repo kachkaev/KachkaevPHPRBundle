@@ -16,8 +16,8 @@
     }],
     "require": {
         "php": "~5.3",
-        "kachkaev/php-r": "1.0.*@dev",
-        "symfony/framework-bundle": "~2.0"
+        "kachkaev/php-r": "^1.0",
+        "symfony/framework-bundle" : "~2.3|~3.0"
     },
     "autoload": {
         "psr-0": {

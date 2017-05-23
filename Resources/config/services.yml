@@ -6,11 +6,11 @@ parameters:
 services:
     kachkaev_php_r.core:
         class: Kachkaev\PHPR\RCore
-        arguments: [@kachkaev_php_r.engine.command_line]
+        arguments: ['@kachkaev_php_r.engine.command_line']
 
     kachkaev_php_r.engine.command_line:
         class: Kachkaev\PHPR\Engine\CommandLineREngine
-        arguments: [%kachkaev_php_r.engine.command_line.path_to_r%]
+        arguments: ['%kachkaev_php_r.engine.command_line.path_to_r%']
 
 #    kachkaev_php_r.engine.server_based:
 #        class: Kachkaev\PHPR\Engine\ServerBasedREngine
