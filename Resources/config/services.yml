@@ -1,20 +1,20 @@
 parameters:
-#   kachkaev_php_r.engine: 
-    kachkaev_php_r.engine.command_line.path_to_r: /usr/bin/R
-#   kachkaev_php_r.engine.server_based.url: 127.0.0.1:8787
+#   kachkaev_phpr.engine: 
+    kachkaev_phpr.engine.command_line.path_to_r: /usr/bin/R
+#   kachkaev_phpr.engine.server_based.url: 127.0.0.1:8787
 
 services:
-    kachkaev_php_r.core:
+    kachkaev_phpr.core:
         class: Kachkaev\PHPR\RCore
-        arguments: ['@kachkaev_php_r.engine.command_line']
+        arguments: ['@kachkaev_phpr.engine.command_line']
 
-    kachkaev_php_r.engine.command_line:
+    kachkaev_phpr.engine.command_line:
         class: Kachkaev\PHPR\Engine\CommandLineREngine
-        arguments: ['%kachkaev_php_r.engine.command_line.path_to_r%']
+        arguments: ['%kachkaev_phpr.engine.command_line.path_to_r%']
 
-#    kachkaev_php_r.engine.server_based:
+#    kachkaev_phpr.engine.server_based:
 #        class: Kachkaev\PHPR\Engine\ServerBasedREngine
 #        arguments: [%kachkaev_r.engine.server_based.url%]
 
-    kachkaev_php_r.output_parser:
+    kachkaev_phpr.output_parser:
         class: Kachkaev\PHPR\ROutputParser

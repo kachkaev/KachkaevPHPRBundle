@@ -46,7 +46,7 @@ Configuration
 Here is the default configuration for the bundle:
 
 ```yml
-kachkaev_php_r:
+kachkaev_phpr:
     default_enginge: command_line    # default R engine (command_line is the only one currently implemented)  
     engines:
         command_line:
@@ -56,20 +56,20 @@ kachkaev_php_r:
 In most cases custom configuration is not needed, so simply add the following line to your ``app/config/config.yml``:
 
 ```yml
-kachkaev_php_r: ~
+kachkaev_phpr: ~
 ```
 
 Usage
 -----
 
 ```php
-$r = $container->get('kachkaev_php_r.core');
+$r = $container->get('kachkaev_phpr.core');
 $rResult = $r->run('x = 10
 x * x');
 
 // --- or ---
 
-$r = $container->get('kachkaev_php_r.core');
+$r = $container->get('kachkaev_phpr.core');
 $rProcess = $r->createInteractiveProcess();
 $rProcess->write('x = 10');
 $rProcess->write('x * x');
@@ -87,7 +87,7 @@ For detailed feature description of R core and R process see documentation to [p
 
 An instance of ```ROutputParser``` is also registered as a service:
 ```php
-$rOutputParser = $container->get('kachkaev_php_r.output_parser');
+$rOutputParser = $container->get('kachkaev_phpr.output_parser');
 
 $rProcess->write('21 + 21');
 var_dump($rProcess->getLastWriteOutput());
