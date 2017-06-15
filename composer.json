@@ -15,7 +15,7 @@
         "homepage": "https://github.com/kachkaev/KachkaevPHPRBundle/contributors"
     }],
     "require": {
-        "php": "~5.3",
+        "php": ">=5.3",
         "kachkaev/php-r": "^1.0",
         "symfony/framework-bundle" : "~2.3|~3.0"
     },
