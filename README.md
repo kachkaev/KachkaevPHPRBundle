@@ -47,7 +47,7 @@ Here is the default configuration for the bundle:
 
 ```yml
 kachkaev_phpr:
-    default_enginge: command_line    # default R engine (command_line is the only one currently implemented)  
+    default_engine: command_line     # default R engine (command_line is the only one currently implemented)  
     engines:
         command_line:
             path_to_r: /usr/bin/R    # path to R interpreter

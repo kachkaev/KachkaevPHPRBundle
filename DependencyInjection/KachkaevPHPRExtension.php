@@ -24,5 +24,7 @@ class KachkaevPHPRExtension extends Extension
 
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.yml');
+
+        $container->setParameter('kachkaev_phpr.engine.command_line.path_to_r', $config['engines']['command_line']['path_to_r']);
     }
 }

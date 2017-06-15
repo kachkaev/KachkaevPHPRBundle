@@ -20,9 +20,23 @@ class Configuration implements ConfigurationInterface
         $treeBuilder = new TreeBuilder();
         $rootNode = $treeBuilder->root('kachkaev_phpr');
 
-        // Here you should define the parameters that are allowed to
-        // configure your bundle. See the documentation linked above for
-        // more information on that topic.
+        $rootNode
+            ->children()
+                ->enumNode('default_engine')
+                    ->values(array('command_line'))
+                    ->defaultValue('command_line')
+                    ->info('default R engine (command_line is the only one currently implemented)')
+                    ->end()
+                ->arrayNode('engines')
+                    ->useAttributeAsKey('name')
+                    ->prototype('array')
+                    ->children()
+                        ->scalarNode('path_to_r')
+                            ->defaultValue('/usr/bin/R')
+                            ->end()
+                    ->end()
+                ->end()
+            ->end();
 
         return $treeBuilder;
     }
